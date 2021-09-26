@@ -1,46 +1,31 @@
-import samplesHTML from './templates/gallery-items.hbs';
-import menu from './menu.json';
+import FetchApi from "./apiFetch";
+import render from "./templates/render.hbs"
 
-const menuEl = document.querySelector('.js-menu');
+// элемент списка
+const ulEl = document.getElementById('root');
 
-menuEl.insertAdjacentHTML('beforeend', createMenu(menu));
+// создаёт новый класс на основе базового
+const newFetchApi = new FetchApi();
 
-function createMenu(menu) {
-  return samplesHTML({menu})
-}
-const Theme = {
-  LIGHT: 'light-theme',
-  DARK: 'dark-theme',
-};
+// запись в локалсторедж объектом
+newFetchApi.fetchGenres().then(r => localStorage.setItem('genres', JSON.stringify(r.genres)));
 
-const checkboxEl = document.querySelector('#theme-switch-toggle');
+// пример того что сохранилось в локалсторедж
+// console.log(JSON.parse(localStorage.getItem('genres')))
 
-checkboxEl.addEventListener('change', getThemeToBody)
-function getThemeToBody() {
-  if (document.body.classList.contains('dark-theme')) {
-    document.body.classList.remove('dark-theme');
-    document.body.classList.add('light-theme');
-    localStorage.setItem('currentTheme', Theme.LIGHT)
-  }
-  else if (document.body.classList.contains('light-theme')) {
-    document.body.classList.remove('light-theme');
-    document.body.classList.add('dark-theme');
-    localStorage.setItem('currentTheme', Theme.DARK)
-  }
-  else {
-    document.body.classList.add('dark-theme');
-    localStorage.setItem('currentTheme', Theme.DARK);
-  }
+// запись в localeStorage отдельными id и name - побаловаться)
+// newFetchApi.fetchGenres().then(r => {r.genres.forEach(e => localStorage.setItem(`${e.id}`,  e.name))})
+
+// запрос за популярными фильмами за день и рендер
+newFetchApi.fetchApi().then(results => {
+    renderFile(results)
+})
+
+// функция рендера
+function renderFile(results) {
+    ulEl.insertAdjacentHTML('beforeend', render({results}))
 }
 
-if (localStorage.getItem('currentTheme') === 'light-theme') {
-  document.body.classList.remove('dark-theme');
-  document.body.classList.add('light-theme');
-  localStorage.setItem('currentTheme', Theme.LIGHT);
-} else if (localStorage.getItem('currentTheme') === 'dark-theme') {
-  document.body.classList.remove('light-theme');
-  document.body.classList.add('dark-theme');
-  localStorage.setItem('currentTheme', Theme.DARK);
-  checkboxEl.checked = 'true';
-}
-console.log('error none1');
+
+
+
